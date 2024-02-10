@@ -7,6 +7,7 @@ class VirtualTour {
      */
     constructor(tourFile) {
         this.arrows = [];
+        this.scenes;
         this.textureLoader = new THREE.TextureLoader();
 
         this.scene = new THREE.Scene();
@@ -47,7 +48,6 @@ class VirtualTour {
 
         this.sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
         this.scene.add(this.sphere);
-        console.log("sphere");
     }
 
     /**
@@ -61,7 +61,7 @@ class VirtualTour {
         const arrowSprite = new THREE.Sprite(arrowMaterial);
         arrowSprite.scale.set(2, 2, 1);
         arrowSprite.position.set(coordinates[0], coordinates[1], coordinates[2]);
-        arrowSprite.userData.ref = "images/" + ref;
+        arrowSprite.userData.ref = ref;
         this.scene.add(arrowSprite);
         this.arrows.push(arrowSprite);
     }
@@ -102,13 +102,19 @@ class VirtualTour {
 
             // checks if any of the arrows were clicked
             for (let arrow of this.arrows) {
-                const intersects = raycaster.intersectObject(arrow);
-                if (intersects.length > 0) {
-                    this.scene.remove(this.sphere);
+                const clicked = raycaster.intersectObject(arrow).length > 0;
+                if (!clicked) continue;
 
-                    // moves to the corresponfing pano view
-                    this.sphere = this.createSphere(arrow.userData.ref);
-                    this.scene.add(this.sphere);
+                // removes old scene and its arrows
+                this.scene.remove(this.sphere);
+                this.arrows.forEach(a => this.scene.remove(a));
+                this.arrows = [];
+                
+                // moves to the new scene
+                const referedScene = arrow.userData.ref;
+                this.sphere = this.createSphere("images/" + referedScene + ".jpg");
+                for (let newArrow of this.scenes[referedScene]) {
+                    this.createArrow(newArrow.position, newArrow.ref);
                 }
             }
         });
@@ -135,11 +141,3 @@ function animate() {
     testTour.updateArrowVisibility();
     testTour.renderer.render(testTour.scene, testTour.camera);
 }
-
-
-// function processObject(object) {
-//     if (object instanceof THREE.Sprite) {
-//         console.log('Found sprite:', object);
-//     }
-// }
-// scene.traverse(processObject);
