@@ -2,12 +2,16 @@ import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.121.1/exampl
 
 
 class VirtualTour {
+    /**
+     * @param {String} tourFile path to a .json file containing the tour data
+     */
     constructor(tourFile) {
+        this.arrows = [];
+        this.textureLoader = new THREE.TextureLoader();
+
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.set(-1, 0, 0);
-
-        this.textureLoader = new THREE.TextureLoader();
 
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -17,25 +21,40 @@ class VirtualTour {
         this.lookaroundControls.enableZoom = false;
         this.lookaroundControls.rotateSpeed = -0.4;
 
-        this.arrows = [];
+        // loads the scene from a .json file
+        this.fetchData(tourFile)
+            .then(() => {
+                this.createSphere("images/" + this.scenes.startLocation + ".jpg");
+                for (let arrow of this.scenes[this.scenes.startLocation]) {
+                    this.createArrow(arrow.position, arrow.ref);
+                }
 
-        this.createSphere("images/" + scenes.startLocation + ".jpg");
-        for (let arrow of scenes[scenes.startLocation]) {
-            this.createArrow(arrow.possition, arrow.ref);
-            console.log(arrow.possition);
-        }
+                this.addResizeListener();
+                this.addArrowClickListener();
+            });
     }
 
+    /**
+     * Adds a pano-image projected onto a sphere to the scene
+     * @param {String} texturePath file path to a 360° panoramic image
+     */
     createSphere(texturePath) {
         const sphereGeometry = new THREE.SphereGeometry(50, 32, 32);
         const sphereMaterial = new THREE.MeshBasicMaterial({
             map: this.textureLoader.load(texturePath),
             side: THREE.DoubleSide
         });
+
         this.sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
         this.scene.add(this.sphere);
+        console.log("sphere");
     }
 
+    /**
+     * Adds arrow buttons that link to other scenes
+     * @param {int[]} coordinates int array containing the arrows x,y,z coordinates
+     * @param {String} ref name of the linkes panoramic scene
+     */
     createArrow(coordinates, ref) {
         const arrowTexture = this.textureLoader.load('assets/arrow.png');
         const arrowMaterial = new THREE.SpriteMaterial({ map: arrowTexture });
@@ -47,23 +66,68 @@ class VirtualTour {
         this.arrows.push(arrowSprite);
     }
 
-    // displays the arrow if its in the middle third of the screen
+    /**
+     * Displays an arrow if it's in the middle section of the screen
+     */
     updateArrowVisibility() {
-        const arrowPosition = this.arrows[0].position.clone();
-        arrowPosition.project(this.camera);
-        // this.arrows[0].visible = (arrowPosition.x > -0.7 && arrowPosition.x < 0.7);
+        for (let arrow of this.arrows) {
+            const arrowPosition = arrow.position.clone();
+            arrowPosition.project(this.camera);
+            arrow.visible = (arrowPosition.x > -0.7 && arrowPosition.x < 0.7);
+        }
+    }
+
+    /**
+     * Adapts the scenes size to the viewports size
+     */
+    addResizeListener() {
+        window.addEventListener('resize', () => {
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+            this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.camera.updateProjectionMatrix();
+        });
+    }
+
+    /**
+     * Listens for clicks on the arrows and switches to the corresponding scenes 
+     */
+    addArrowClickListener() {
+        window.addEventListener('click', (event) => {
+            const mouse = new THREE.Vector2();
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(mouse, this.camera);
+
+            // checks if any of the arrows were clicked
+            for (let arrow of this.arrows) {
+                const intersects = raycaster.intersectObject(arrow);
+                if (intersects.length > 0) {
+                    this.scene.remove(this.sphere);
+
+                    // moves to the corresponfing pano view
+                    this.sphere = this.createSphere(arrow.userData.ref);
+                    this.scene.add(this.sphere);
+                }
+            }
+        });
+    }
+
+    /**
+     * loads the scene data from a .json file
+     * @param {String} tourFile path to a .json file containing the tour data
+     */
+    async fetchData(tourFile) {
+        const response = await fetch(tourFile);
+        this.scenes = await response.json();
+        // return this.scenes
     }
 }
 
 
-
-const scenes = {
-    startLocation: "pano_1",
-    pano_1: [{ possition: [45, 3, 0], ref: "pano_2.jpg" }, { possition: [-10, 0, -25], ref: "pano_4.jpg" }],
-    pano_2: [{ possition: [-10, 2, -25], ref: "pano_1.jpg" }]
-};
-
 const testTour = new VirtualTour("scenes.json");
+animate();
 
 function animate() {
     requestAnimationFrame(animate);
@@ -72,35 +136,6 @@ function animate() {
     testTour.renderer.render(testTour.scene, testTour.camera);
 }
 
-animate();
-
-window.addEventListener('resize', () => {
-    testTour.renderer.setSize(window.innerWidth, window.innerHeight);
-    testTour.camera.aspect = window.innerWidth / window.innerHeight;
-    testTour.camera.updateProjectionMatrix();
-});
-
-
-window.addEventListener('click', (event) => {
-    const mouse = new THREE.Vector2();
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, testTour.camera);
-
-    // checks if any of the arrows were clicked
-    for (let arrow of testTour.arrows) {
-        const intersects = raycaster.intersectObject(arrow);
-        if (intersects.length > 0) {
-            testTour.scene.remove(testTour.sphere);
-
-            // moves to the corresponfing pano view
-            testTour.sphere = testTour.createSphere(arrow.userData.ref);
-            testTour.scene.add(testTour.sphere);
-        }
-    }
-});
 
 // function processObject(object) {
 //     if (object instanceof THREE.Sprite) {
