@@ -4,8 +4,9 @@ import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.121.1/exampl
 class VirtualTour {
     /**
      * @param {String} tourFile path to a .json file containing the tour data
+     * @param {String} element id of HTML element to contain the simulation
      */
-    constructor(tourFile) {
+    constructor(tourFile, element) {
         this.arrows = [];
         this.scenes;
         this.textureLoader = new THREE.TextureLoader();
@@ -59,7 +60,7 @@ class VirtualTour {
         const arrowTexture = this.textureLoader.load('assets/arrow.png');
         const arrowMaterial = new THREE.SpriteMaterial({ map: arrowTexture });
         const arrowSprite = new THREE.Sprite(arrowMaterial);
-        arrowSprite.scale.set(2, 2, 1);
+        arrowSprite.scale.set(10, 5, 1);
         arrowSprite.position.set(coordinates[0], coordinates[1], coordinates[2]);
         arrowSprite.userData.ref = ref;
         this.scene.add(arrowSprite);
@@ -109,7 +110,7 @@ class VirtualTour {
                 this.scene.remove(this.sphere);
                 this.arrows.forEach(a => this.scene.remove(a));
                 this.arrows = [];
-                
+
                 // moves to the new scene
                 const referedScene = arrow.userData.ref;
                 this.sphere = this.createSphere("images/" + referedScene + ".jpg");
@@ -121,23 +122,32 @@ class VirtualTour {
     }
 
     /**
+     * Starts the animation of the scene
+     */
+    animate() {
+        this.animationId = requestAnimationFrame(this.animate.bind(this));
+        this.lookaroundControls.update();
+        this.updateArrowVisibility();
+        this.renderer.render(this.scene, this.camera);
+    }
+
+    stopAnimation(removeFromDOM) {
+        cancelAnimationFrame(this.animationId);
+        if (removeFromDOM) {
+            document.body.removeChild(this.renderer.domElement);
+        }
+    }
+
+    /**
      * loads the scene data from a .json file
      * @param {String} tourFile path to a .json file containing the tour data
      */
     async fetchData(tourFile) {
         const response = await fetch(tourFile);
         this.scenes = await response.json();
-        // return this.scenes
     }
 }
 
 
-const testTour = new VirtualTour("scenes.json");
-animate();
-
-function animate() {
-    requestAnimationFrame(animate);
-    testTour.lookaroundControls.update();
-    testTour.updateArrowVisibility();
-    testTour.renderer.render(testTour.scene, testTour.camera);
-}
+const tour = new VirtualTour("scenes.json");
+tour.animate();
