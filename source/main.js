@@ -11,13 +11,16 @@ class VirtualTour {
         this.scenes;
         this.textureLoader = new THREE.TextureLoader();
 
+        this.container = document.getElementById(elementId)
+        const width = this.container.clientWidth;
+        const height = this.container.clientHeight;
+
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.camera = new THREE.PerspectiveCamera(70, width / height, 0.1, 1000);
         this.camera.position.set(-1, 0, 0);
 
-        this.container = document.getElementById(elementId)
         this.renderer = new THREE.WebGLRenderer();
-        this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+        this.renderer.setSize(width, height);
         this.container.appendChild(this.renderer.domElement);
 
         this.lookaroundControls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -84,8 +87,11 @@ class VirtualTour {
      */
     addResizeListener() {
         window.addEventListener('resize', () => {
-            this.renderer.setSize(window.innerWidth, window.innerHeight);
-            this.camera.aspect = window.innerWidth / window.innerHeight;
+            const width = this.container.clientWidth;
+            const height = this.container.clientHeight;
+
+            this.renderer.setSize(width, height);
+            this.camera.aspect = width / height;
             this.camera.updateProjectionMatrix();
         });
     }
