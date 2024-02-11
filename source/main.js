@@ -4,9 +4,9 @@ import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.121.1/exampl
 class VirtualTour {
     /**
      * @param {String} tourFile path to a .json file containing the tour data
-     * @param {String} element id of HTML element to contain the simulation
+     * @param {String} elementId id of an HTML element to contain the virtual tour
      */
-    constructor(tourFile, element) {
+    constructor(tourFile, elementId) {
         this.arrows = [];
         this.scenes;
         this.textureLoader = new THREE.TextureLoader();
@@ -15,9 +15,10 @@ class VirtualTour {
         this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.set(-1, 0, 0);
 
+        this.container = document.getElementById(elementId)
         this.renderer = new THREE.WebGLRenderer();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(this.renderer.domElement);
+        this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+        this.container.appendChild(this.renderer.domElement);
 
         this.lookaroundControls = new OrbitControls(this.camera, this.renderer.domElement);
         this.lookaroundControls.enableZoom = false;
@@ -95,8 +96,8 @@ class VirtualTour {
     addArrowClickListener() {
         window.addEventListener('click', (event) => {
             const mouse = new THREE.Vector2();
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            mouse.x = (event.clientX / this.container.clientWidth) * 2 - 1;
+            mouse.y = -(event.clientY / this.container.clientHeight) * 2 + 1;
 
             const raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(mouse, this.camera);
@@ -122,24 +123,34 @@ class VirtualTour {
     }
 
     /**
-     * Starts the animation of the scene
+     * Starts the animation of the virtual tour
      */
-    animate() {
-        this.animationId = requestAnimationFrame(this.animate.bind(this));
+    start() {
+        this.animationId = requestAnimationFrame(this.start.bind(this));
         this.lookaroundControls.update();
         this.updateArrowVisibility();
         this.renderer.render(this.scene, this.camera);
     }
 
-    stopAnimation(removeFromDOM) {
+    /**
+     * Stops the animation of the virtual tour 
+     */
+    stop() {
         cancelAnimationFrame(this.animationId);
-        if (removeFromDOM) {
-            document.body.removeChild(this.renderer.domElement);
-        }
     }
 
     /**
-     * loads the scene data from a .json file
+     * Changes the html element containing the virtual tour
+     * @param {String} elementId HTML element ID 
+     */
+    setContainer(elementId) {
+        this.container.removeChild(this.renderer.domElement);
+        this.container = document.getElementById(elementId);
+        this.container.appendChild(this.renderer.domElement);
+    }
+
+    /**
+     * Loads the scene data from a .json file
      * @param {String} tourFile path to a .json file containing the tour data
      */
     async fetchData(tourFile) {
@@ -149,5 +160,5 @@ class VirtualTour {
 }
 
 
-const tour = new VirtualTour("scenes.json");
-tour.animate();
+let tour = new VirtualTour("scenes.json", "d");
+tour.start();
