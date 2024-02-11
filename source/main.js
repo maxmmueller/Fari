@@ -168,6 +168,4 @@ class VirtualTour {
     }
 }
 
-
-const tour = new VirtualTour("scenes.json", "d");
-tour.start();
+module.exports = VirtualTour;
