@@ -3,8 +3,8 @@ import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.121.1/exampl
 
 class VirtualTour {
     /**
-     * @param {String} tourFile path to a .json file containing the tour data
-     * @param {String} elementId id of an HTML element to contain the virtual tour
+     * @param {String} tourFile Path to a .json file containing the tour data
+     * @param {String} elementId ID of an HTML element to contain the virtual tour
      */
     constructor(tourFile, elementId) {
         this.arrows = [];
@@ -28,23 +28,23 @@ class VirtualTour {
         this.lookaroundControls.rotateSpeed = -0.4;
 
         // loads the scene from a .json file
-        this.fetchData(tourFile)
+        this.#fetchData(tourFile)
             .then(() => {
-                this.createSphere("images/" + this.scenes.startLocation + ".jpg");
+                this.#createSphere("images/" + this.scenes.startLocation + ".jpg");
                 for (let arrow of this.scenes[this.scenes.startLocation]) {
-                    this.createArrow(arrow.position, arrow.ref);
+                    this.#createArrow(arrow.position, arrow.ref);
                 }
 
-                this.addResizeListener();
-                this.addArrowClickListener();
+                this.#addResizeListener();
+                this.#addArrowClickListener();
             });
     }
 
     /**
      * Adds a pano-image projected onto a sphere to the scene
-     * @param {String} texturePath file path to a 360° panoramic image
+     * @param {String} texturePath File path to a 360° panoramic image
      */
-    createSphere(texturePath) {
+    #createSphere(texturePath) {
         const sphereGeometry = new THREE.SphereGeometry(50, 32, 32);
         const sphereMaterial = new THREE.MeshBasicMaterial({
             map: this.textureLoader.load(texturePath),
@@ -57,10 +57,10 @@ class VirtualTour {
 
     /**
      * Adds arrow buttons that link to other scenes
-     * @param {int[]} coordinates int array containing the arrows x,y,z coordinates
-     * @param {String} ref name of the linkes panoramic scene
+     * @param {int[]} coordinates Array containing the arrows x,y,z coordinates
+     * @param {String} ref Name of the linkes panoramic scene
      */
-    createArrow(coordinates, ref) {
+    #createArrow(coordinates, ref) {
         const arrowTexture = this.textureLoader.load('assets/arrow.png');
         const arrowMaterial = new THREE.SpriteMaterial({ map: arrowTexture });
         const arrowSprite = new THREE.Sprite(arrowMaterial);
@@ -74,7 +74,7 @@ class VirtualTour {
     /**
      * Displays an arrow if it's in the middle section of the screen
      */
-    updateArrowVisibility() {
+    #updateArrowVisibility() {
         for (let arrow of this.arrows) {
             const arrowPosition = arrow.position.clone();
             arrowPosition.project(this.camera);
@@ -85,7 +85,7 @@ class VirtualTour {
     /**
      * Adapts the scenes size to the viewports size
      */
-    addResizeListener() {
+    #addResizeListener() {
         window.addEventListener('resize', () => {
             const width = this.container.clientWidth;
             const height = this.container.clientHeight;
@@ -99,11 +99,14 @@ class VirtualTour {
     /**
      * Listens for clicks on the arrows and switches to the corresponding scenes 
      */
-    addArrowClickListener() {
+    #addArrowClickListener() {
         window.addEventListener('click', (event) => {
             const mouse = new THREE.Vector2();
-            mouse.x = (event.clientX / this.container.clientWidth) * 2 - 1;
-            mouse.y = -(event.clientY / this.container.clientHeight) * 2 + 1;
+
+            const offsetTop = this.container.getBoundingClientRect().x;
+            const offsetLeft = this.container.getBoundingClientRect().y;
+            mouse.x = ((event.clientX - offsetLeft) / this.container.clientWidth) * 2 - 1;
+            mouse.y = -((event.clientY - offsetTop) / this.container.clientHeight) * 2 + 1;
 
             const raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(mouse, this.camera);
@@ -120,12 +123,21 @@ class VirtualTour {
 
                 // moves to the new scene
                 const referedScene = arrow.userData.ref;
-                this.sphere = this.createSphere("images/" + referedScene + ".jpg");
+                this.sphere = this.#createSphere("images/" + referedScene + ".jpg");
                 for (let newArrow of this.scenes[referedScene]) {
-                    this.createArrow(newArrow.position, newArrow.ref);
+                    this.#createArrow(newArrow.position, newArrow.ref);
                 }
             }
         });
+    }
+
+    /**
+     * Loads the scene data from a .json file
+     * @param {String} tourFile Path to a .json file containing the tour data
+    */
+    async #fetchData(tourFile) {
+        const response = await fetch(tourFile);
+        this.scenes = await response.json();
     }
 
     /**
@@ -134,7 +146,7 @@ class VirtualTour {
     start() {
         this.animationId = requestAnimationFrame(this.start.bind(this));
         this.lookaroundControls.update();
-        this.updateArrowVisibility();
+        this.#updateArrowVisibility();
         this.renderer.render(this.scene, this.camera);
     }
 
@@ -146,7 +158,7 @@ class VirtualTour {
     }
 
     /**
-     * Changes the html element containing the virtual tour
+     * Changes the HTML element containing the virtual tour
      * @param {String} elementId HTML element ID 
      */
     setContainer(elementId) {
@@ -154,17 +166,8 @@ class VirtualTour {
         this.container = document.getElementById(elementId);
         this.container.appendChild(this.renderer.domElement);
     }
-
-    /**
-     * Loads the scene data from a .json file
-     * @param {String} tourFile path to a .json file containing the tour data
-     */
-    async fetchData(tourFile) {
-        const response = await fetch(tourFile);
-        this.scenes = await response.json();
-    }
 }
 
 
-let tour = new VirtualTour("scenes.json", "d");
+const tour = new VirtualTour("scenes.json", "d");
 tour.start();
