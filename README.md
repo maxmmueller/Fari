@@ -11,15 +11,13 @@ Fari
 <p align="center">A lightweight JavaScript library for creating virtual tours </p>
 
 ## Features
-With Fari, you can easily integrate virtual tours into your own website.
+With Fari, you can easily integrate [virtual tours](https://en.wikipedia.org/wiki/Virtual_tour) into your own website.
 
 ## Installation
 You can install Fari from the npm with the following command:
 ```
 npm install fari
 ```
-
-Alternatively, you can download the latest [release](https://github.com/maxmmueller/fari/releases/latest).
 
 ## Usage 
 

@@ -8,6 +8,9 @@
 |------------|--------|----------------------------------------|
 | `tourFile` | String | Path to a .json file containing the tour data |
 | `elementId`| String | ID of an HTML element to contain the virtual tour |
+| `imageDirectory`| String | Directory containing the panoramic images |
+
+Learn how to structure the .json tourFile [here](tourDocs.md)
 
 Source: [main.js, line 9](../source/main.js#L9)
 
