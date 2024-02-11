@@ -5,10 +5,12 @@ class VirtualTour {
     /**
      * @param {String} tourFile Path to a .json file containing the tour data
      * @param {String} elementId ID of an HTML element to contain the virtual tour
+     * @param {String} imageDirectory Directory containing the panoramic images
      */
-    constructor(tourFile, elementId) {
+    constructor(tourFile, elementId, imageDirectory) {
         this.arrows = [];
         this.scenes;
+        this.imageDirectory = imageDirectory
         this.textureLoader = new THREE.TextureLoader();
 
         this.container = document.getElementById(elementId)
@@ -30,7 +32,7 @@ class VirtualTour {
         // loads the scene from a .json file
         this.#fetchData(tourFile)
             .then(() => {
-                this.#createSphere("images/" + this.scenes.startLocation + ".jpg");
+                this.#createSphere(this.imageDirectory + "/" + this.scenes.startLocation + ".jpg");
                 for (let arrow of this.scenes[this.scenes.startLocation]) {
                     this.#createArrow(arrow.position, arrow.ref);
                 }
@@ -123,7 +125,7 @@ class VirtualTour {
 
                 // moves to the new scene
                 const referedScene = arrow.userData.ref;
-                this.sphere = this.#createSphere("images/" + referedScene + ".jpg");
+                this.sphere = this.#createSphere(this.imageDirectory + "/" + referedScene + ".jpg");
                 for (let newArrow of this.scenes[referedScene]) {
                     this.#createArrow(newArrow.position, newArrow.ref);
                 }
