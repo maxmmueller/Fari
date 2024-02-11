@@ -1,5 +1,2 @@
-source/images/
-source/scenes.json
-package-lock.json
-node_modules/
 package.json
+tests/

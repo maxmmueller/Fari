@@ -1,6 +1,5 @@
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js';
 
-
 class VirtualTour {
     /**
      * @param {String} tourFile Path to a .json file containing the tour data
@@ -10,7 +9,12 @@ class VirtualTour {
     constructor(tourFile, elementId, imageDirectory) {
         this.arrows = [];
         this.scenes;
-        this.imageDirectory = imageDirectory
+        this.imageDirectory = imageDirectory;
+
+        const currentUrl = new URL(import.meta.url);
+        const currentDir = currentUrl.pathname.substring(0, currentUrl.pathname.lastIndexOf('/') + 1);
+        this.arrowImagePath = currentDir + 'assets/arrow.png';
+
         this.textureLoader = new THREE.TextureLoader();
 
         this.container = document.getElementById(elementId)
@@ -63,7 +67,8 @@ class VirtualTour {
      * @param {String} ref Name of the linkes panoramic scene
      */
     #createArrow(coordinates, ref) {
-        const arrowTexture = this.textureLoader.load('assets/arrow.png');
+        // const arrowTexture = this.textureLoader.load('assets/arrow.png');
+        const arrowTexture = this.textureLoader.load(this.arrowImagePath);
         const arrowMaterial = new THREE.SpriteMaterial({ map: arrowTexture });
         const arrowSprite = new THREE.Sprite(arrowMaterial);
         arrowSprite.scale.set(10, 5, 1);
