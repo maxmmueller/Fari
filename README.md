@@ -4,16 +4,22 @@ Fari
 
 <p align="center">
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202-blue"/></a>
+<a href="https://www.npmjs.com/package/fari"><img src="https://img.shields.io/npm/v/fari.svg"/></a>
 </p>
 
 
-<p align="center">A JavaScript library for creating virtual tours </p>
+<p align="center">A lightweight JavaScript library for creating virtual tours </p>
 
 ## Features
 With Fari, you can easily integrate virtual tours into your own website.
 
 ## Installation
-To use this library, download the latest [release](https://github.com/maxmmueller/fari/releases/latest)
+You can install Fari from the npm with the following command:
+```
+npm install fari
+```
+
+Alternatively, you can download the latest [release](https://github.com/maxmmueller/fari/releases/latest).
 
 ## Usage 
 
