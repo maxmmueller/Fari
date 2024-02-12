@@ -49,8 +49,10 @@ class VirtualTour {
      */
     #createSphere(texturePath) {
         const sphereGeometry = new THREE.SphereGeometry(50, 32, 32);
+        const texture = this.textureLoader.load(texturePath);
+        texture.colorSpace = THREE.SRGBColorSpace;
         const sphereMaterial = new THREE.MeshBasicMaterial({
-            map: this.textureLoader.load(texturePath),
+            map: texture,
             side: THREE.DoubleSide
         });
 
