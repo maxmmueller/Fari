@@ -8,6 +8,7 @@ Fari
 </p>
 
 
+
 <p align="center">A lightweight JavaScript library for creating virtual tours </p>
 
 ## Features
@@ -36,3 +37,8 @@ tour.start();
 Contributions to this project are welcome!
 
 If you encounter any problems, find a bug or have feature requests, please open an [issue](https://github.com/maxmmueller/fari/issues/new).
+
+## Support
+If you find Fari helpful, consider supporting its development by buying me a coffee!
+
+[![Buy Me A Coffee](https://img.buymeacoffee.com/button-api/?username=maxmmueller&button_colour=FFDD00&font_colour=000000&font_family=Poppins&outline_colour=000000&coffee_colour=ffffff)](https://www.buymeacoffee.com/maxmmueller)
