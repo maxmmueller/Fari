@@ -26,7 +26,7 @@ Read the [documentation](docs/docs.md) to learn how to use this library.
 ### Code example:
 
 ```js
-const tour = new VirtualTour("scenes.json", "tour-div");
+const tour = new VirtualTour("scenes.json", "tour-div", "pano-images");
 tour.start();
 ```
 
