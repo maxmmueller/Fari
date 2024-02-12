@@ -1,4 +1,5 @@
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 class VirtualTour {
     /**
@@ -10,11 +11,7 @@ class VirtualTour {
         this.arrows = [];
         this.scenes;
         this.imageDirectory = imageDirectory;
-
-        const currentUrl = new URL(import.meta.url);
-        const currentDir = currentUrl.pathname.substring(0, currentUrl.pathname.lastIndexOf('/') + 1);
-        this.arrowImagePath = currentDir + 'assets/arrow.png';
-
+        this.arrowImagePath = '../source/assets/arrow.png';
         this.textureLoader = new THREE.TextureLoader();
 
         this.container = document.getElementById(elementId)
@@ -110,8 +107,8 @@ class VirtualTour {
         window.addEventListener('click', (event) => {
             const mouse = new THREE.Vector2();
 
-            const offsetTop = this.container.getBoundingClientRect().x;
-            const offsetLeft = this.container.getBoundingClientRect().y;
+            const offsetTop = this.container.getBoundingClientRect().y;
+            const offsetLeft = this.container.getBoundingClientRect().x;
             mouse.x = ((event.clientX - offsetLeft) / this.container.clientWidth) * 2 - 1;
             mouse.y = -((event.clientY - offsetTop) / this.container.clientHeight) * 2 + 1;
 
