@@ -1,6 +1,6 @@
 # Class: VirtualTour
 
-## VirtualTour(tourFile, elementId)
+## new VirtualTour(tourFile, elementId, imageDirectory)
 
 ### Parameters:
 
@@ -10,9 +10,9 @@
 | `elementId`| String | ID of an HTML element to contain the virtual tour |
 | `imageDirectory`| String | Directory containing the panoramic images |
 
-Learn how to structure the .json tourFile [here](tourDocs.md)
+Learn how to structure the .json tourFile [here](tourDocs.md).
 
-Source: [main.js, line 9](../source/main.js#L9)
+Source: [main.js, line 10](../source/main.js#L10)
 
 ## Methods
 
@@ -26,16 +26,16 @@ Changes the HTML element containing the virtual tour
 |------------|--------|----------------------|
 | `elementId`| String | HTML element ID      |
 
-Source: [main.js, line 164](../source/main.js#L164)
+Source: [main.js, line 168](../source/main.js#L168)
 
 ### start()
 
 Starts the animation of the virtual tour
 
-Source: [main.js, line 146](../source/main.js#L146)
+Source: [main.js, line 150](../source/main.js#L150)
 
 ### stop()
 
 Stops the animation of the virtual tour
 
-Source: [main.js, line 156](../source/main.js#L156)
+Source: [main.js, line 160](../source/main.js#L160)
