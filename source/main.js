@@ -11,7 +11,7 @@ class VirtualTour {
         this.arrows = [];
         this.scenes;
         this.imageDirectory = imageDirectory;
-        this.arrowImagePath = '../source/assets/arrow.png';
+        this.arrowImagePath = '../node_modules/fari/source/assets/arrow.png';
         this.textureLoader = new THREE.TextureLoader();
 
         this.container = document.getElementById(elementId)
@@ -172,4 +172,4 @@ class VirtualTour {
     }
 }
 
-module.exports = VirtualTour;
+export { VirtualTour };
