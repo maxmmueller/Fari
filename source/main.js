@@ -11,7 +11,7 @@ class VirtualTour {
         this.arrows = [];
         this.scenes;
         this.imageDirectory = imageDirectory;
-        this.arrowImagePath = '../node_modules/fari/source/assets/arrow.png';
+        this.arrowImagePath = '../node_modules/fari/source/assets/dot.png';
         this.textureLoader = new THREE.TextureLoader();
 
         this.container = document.getElementById(elementId)
@@ -53,7 +53,7 @@ class VirtualTour {
         texture.colorSpace = THREE.SRGBColorSpace;
         const sphereMaterial = new THREE.MeshBasicMaterial({
             map: texture,
-            side: THREE.DoubleSide
+            side: THREE.BackSide
         });
 
         this.sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
@@ -70,7 +70,7 @@ class VirtualTour {
         const arrowTexture = this.textureLoader.load(this.arrowImagePath);
         const arrowMaterial = new THREE.SpriteMaterial({ map: arrowTexture });
         const arrowSprite = new THREE.Sprite(arrowMaterial);
-        arrowSprite.scale.set(10, 5, 1);
+        arrowSprite.scale.set(5, 5, 1);
         arrowSprite.position.set(coordinates[0], coordinates[1], coordinates[2]);
         arrowSprite.userData.ref = ref;
         this.scene.add(arrowSprite);
@@ -122,14 +122,17 @@ class VirtualTour {
                 const clicked = raycaster.intersectObject(arrow).length > 0;
                 if (!clicked) continue;
 
-                // removes old scene and its arrows
-                this.scene.remove(this.sphere);
+                // removes the arrows of the old scene
                 this.arrows.forEach(a => this.scene.remove(a));
                 this.arrows = [];
 
                 // moves to the new scene
                 const referedScene = arrow.userData.ref;
-                this.sphere = this.#createSphere(this.imageDirectory + "/" + referedScene + ".jpg");
+                const newTexture = this.textureLoader.load(this.imageDirectory + "/" + referedScene + ".jpg");
+                newTexture.colorSpace = THREE.SRGBColorSpace;
+                this.sphere.material.map = newTexture;
+                this.sphere.material.needsUpdate = true;
+
                 for (let newArrow of this.scenes[referedScene]) {
                     this.#createArrow(newArrow.position, newArrow.ref);
                 }
