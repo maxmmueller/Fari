@@ -30,14 +30,20 @@ class VirtualTour {
         this.lookaroundControls.enableZoom = false;
         this.lookaroundControls.rotateSpeed = -0.4;
 
+        this.neighboringSphereImages = {};
+
         // loads the scene from a .json file
         this.#fetchData(tourFile)
             .then(() => {
-                this.#createSphere(this.imageDirectory + "/" + this.scenes.startLocation + ".jpg");
+                this.#loadNeighboringImages(this.scenes.startLocation);
+
+                // Creates the start location and adds the arrow buttons
+                // this.#createSphere(this.imageDirectory + "/" + this.scenes.startLocation + ".jpg");
+                this.#createSphere(this.scenes.startLocation);
+
                 for (let arrow of this.scenes[this.scenes.startLocation]) {
                     this.#createArrow(arrow.position, arrow.ref);
                 }
-
                 this.#addResizeListener();
                 this.#addArrowClickListener();
             });
@@ -49,8 +55,11 @@ class VirtualTour {
      */
     #createSphere(texturePath) {
         const sphereGeometry = new THREE.SphereGeometry(50, 32, 32);
-        const texture = this.textureLoader.load(texturePath);
-        texture.colorSpace = THREE.SRGBColorSpace;
+
+        // const texture = this.textureLoader.load(texturePath);
+        // texture.colorSpace = THREE.SRGBColorSpace;
+        const texture = this.neighboringSphereImages[texturePath];
+
         const sphereMaterial = new THREE.MeshBasicMaterial({
             map: texture,
             side: THREE.BackSide
@@ -75,6 +84,33 @@ class VirtualTour {
         arrowSprite.userData.ref = ref;
         this.scene.add(arrowSprite);
         this.arrows.push(arrowSprite);
+    }
+
+    #loadNeighboringImages(currentScene) {
+
+        let newTexture = this.textureLoader.load(this.imageDirectory + "/" + currentScene + ".jpg");
+        newTexture.colorSpace = THREE.SRGBColorSpace;
+        this.neighboringSphereImages[currentScene] = newTexture;
+        console.log("1" + currentScene);
+
+        for (const scene of this.scenes[currentScene]) {
+            newTexture = this.textureLoader.load(this.imageDirectory + "/" + scene.ref + ".jpg");
+            newTexture.colorSpace = THREE.SRGBColorSpace;
+
+            this.neighboringSphereImages[scene.ref] = newTexture;
+        }
+
+        const refs = [currentScene];
+        this.scenes[currentScene].forEach(item => {
+            refs.push(item.ref);
+        });
+
+        // deletes the old preloaded texture images
+        for (const image in this.neighboringSphereImages) {
+            if (!refs.includes(image)) {
+                delete this.neighboringSphereImages[image];
+            }
+        }
     }
 
     /**
@@ -102,23 +138,27 @@ class VirtualTour {
         });
     }
 
+    #getClickPosition(event) {
+        const mouse = new THREE.Vector2();
+
+        const offsetTop = this.container.getBoundingClientRect().y;
+        const offsetLeft = this.container.getBoundingClientRect().x;
+        mouse.x = ((event.clientX - offsetLeft) / this.container.clientWidth) * 2 - 1;
+        mouse.y = -((event.clientY - offsetTop) / this.container.clientHeight) * 2 + 1;
+
+        return mouse;
+    }
+
     /**
      * Listens for clicks on the arrows and switches to the corresponding scenes 
      */
     #addArrowClickListener() {
         window.addEventListener('click', (event) => {
-            const mouse = new THREE.Vector2();
-
-            const offsetTop = this.container.getBoundingClientRect().y;
-            const offsetLeft = this.container.getBoundingClientRect().x;
-            mouse.x = ((event.clientX - offsetLeft) / this.container.clientWidth) * 2 - 1;
-            mouse.y = -((event.clientY - offsetTop) / this.container.clientHeight) * 2 + 1;
-
             const raycaster = new THREE.Raycaster();
-            raycaster.setFromCamera(mouse, this.camera);
+            raycaster.setFromCamera(this.#getClickPosition(event), this.camera);
 
             // checks if any of the arrows were clicked
-            for (let arrow of this.arrows) {
+            for (const arrow of this.arrows) {
                 const clicked = raycaster.intersectObject(arrow).length > 0;
                 if (!clicked) continue;
 
@@ -126,16 +166,16 @@ class VirtualTour {
                 this.arrows.forEach(a => this.scene.remove(a));
                 this.arrows = [];
 
-                // moves to the new scene
+                // moves to the refered scene scene
                 const referedScene = arrow.userData.ref;
-                const newTexture = this.textureLoader.load(this.imageDirectory + "/" + referedScene + ".jpg");
-                newTexture.colorSpace = THREE.SRGBColorSpace;
-                this.sphere.material.map = newTexture;
+                this.sphere.material.map = this.neighboringSphereImages[referedScene];
                 this.sphere.material.needsUpdate = true;
 
                 for (let newArrow of this.scenes[referedScene]) {
                     this.#createArrow(newArrow.position, newArrow.ref);
                 }
+
+                this.#loadNeighboringImages(referedScene);
             }
         });
     }
