@@ -4,17 +4,19 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 class VirtualTour {
     /**
      * @param {String} tourFile Path to a .json file containing the tour data
-     * @param {String} elementId ID of an HTML element to contain the virtual tour
+     * @param {String} containerElement ID of an HTML element to contain the virtual tour
      * @param {String} imageDirectory Directory containing the panoramic images
      */
-    constructor(tourFile, elementId, imageDirectory) {
-        this.arrows = [];
+    constructor(tourFile, containerElement, imageDirectory) {
         this.scenes;
+        this.arrows = [];
+        this.preloadedTextures = {};
+
         this.imageDirectory = imageDirectory;
         this.arrowImagePath = '../node_modules/fari/source/assets/dot.png';
         this.textureLoader = new THREE.TextureLoader();
 
-        this.container = document.getElementById(elementId)
+        this.container = document.getElementById(containerElement)
         const width = this.container.clientWidth;
         const height = this.container.clientHeight;
 
@@ -30,36 +32,28 @@ class VirtualTour {
         this.lookaroundControls.enableZoom = false;
         this.lookaroundControls.rotateSpeed = -0.4;
 
-        this.neighboringSphereImages = {};
-
-        // loads the scene from a .json file
+        // loads the virtual tour from a .json file
         this.#fetchData(tourFile)
             .then(() => {
-                this.#loadNeighboringImages(this.scenes.startLocation);
-
-                // Creates the start location and adds the arrow buttons
-                // this.#createSphere(this.imageDirectory + "/" + this.scenes.startLocation + ".jpg");
-                this.#createSphere(this.scenes.startLocation);
-
+                // loads the start location
+                this.#loadTexture(this.scenes.startLocation)
+                this.#createProjectionSphere();
                 for (let arrow of this.scenes[this.scenes.startLocation]) {
                     this.#createArrow(arrow.position, arrow.ref);
                 }
+
                 this.#addResizeListener();
                 this.#addArrowClickListener();
+                this.#preloadNeighboringScenes(this.scenes.startLocation);
             });
     }
 
     /**
-     * Adds a pano-image projected onto a sphere to the scene
-     * @param {String} texturePath File path to a 360° panoramic image
+     * Adds the pano-projection sphere to the scene
      */
-    #createSphere(texturePath) {
+    #createProjectionSphere() {
         const sphereGeometry = new THREE.SphereGeometry(50, 32, 32);
-
-        // const texture = this.textureLoader.load(texturePath);
-        // texture.colorSpace = THREE.SRGBColorSpace;
-        const texture = this.neighboringSphereImages[texturePath];
-
+        const texture = this.preloadedTextures[this.scenes.startLocation];
         const sphereMaterial = new THREE.MeshBasicMaterial({
             map: texture,
             side: THREE.BackSide
@@ -86,31 +80,33 @@ class VirtualTour {
         this.arrows.push(arrowSprite);
     }
 
-    #loadNeighboringImages(currentScene) {
-
-        let newTexture = this.textureLoader.load(this.imageDirectory + "/" + currentScene + ".jpg");
-        newTexture.colorSpace = THREE.SRGBColorSpace;
-        this.neighboringSphereImages[currentScene] = newTexture;
-        console.log("1" + currentScene);
-
-        for (const scene of this.scenes[currentScene]) {
-            newTexture = this.textureLoader.load(this.imageDirectory + "/" + scene.ref + ".jpg");
-            newTexture.colorSpace = THREE.SRGBColorSpace;
-
-            this.neighboringSphereImages[scene.ref] = newTexture;
+    /**
+     * Prelaods the textures that are neighboring the active one
+     * @param {String} currentScene Name of the active scene 
+     */
+    #preloadNeighboringScenes(currentScene) {
+        for (const texture of this.scenes[currentScene]) {
+            this.#loadTexture(texture.ref);
         }
-
-        const refs = [currentScene];
-        this.scenes[currentScene].forEach(item => {
-            refs.push(item.ref);
-        });
 
         // deletes the old preloaded texture images
-        for (const image in this.neighboringSphereImages) {
-            if (!refs.includes(image)) {
-                delete this.neighboringSphereImages[image];
+        const neighboringScenes = [currentScene, ...this.scenes[currentScene].map(item => item.ref)];
+        for (const texture in this.preloadedTextures) {
+            if (!neighboringScenes.includes(texture)) {
+                delete this.preloadedTextures[texture];
             }
         }
+        // console.log(Object.keys(this.preloadedTextures).length);
+    }
+
+    /**
+     * Creates a threejs texture out of an image
+     * @param {String} textureName Name of the texture image
+     */
+    #loadTexture(textureName) {
+        const newTexture = this.textureLoader.load(this.imageDirectory + "/" + textureName + ".jpg");
+        newTexture.colorSpace = THREE.SRGBColorSpace;
+        this.preloadedTextures[textureName] = newTexture;
     }
 
     /**
@@ -139,10 +135,10 @@ class VirtualTour {
     }
 
     #getClickPosition(event) {
-        const mouse = new THREE.Vector2();
-
         const offsetTop = this.container.getBoundingClientRect().y;
         const offsetLeft = this.container.getBoundingClientRect().x;
+
+        const mouse = new THREE.Vector2();
         mouse.x = ((event.clientX - offsetLeft) / this.container.clientWidth) * 2 - 1;
         mouse.y = -((event.clientY - offsetTop) / this.container.clientHeight) * 2 + 1;
 
@@ -168,14 +164,14 @@ class VirtualTour {
 
                 // moves to the refered scene scene
                 const referedScene = arrow.userData.ref;
-                this.sphere.material.map = this.neighboringSphereImages[referedScene];
+                this.sphere.material.map = this.preloadedTextures[referedScene];
                 this.sphere.material.needsUpdate = true;
 
                 for (let newArrow of this.scenes[referedScene]) {
                     this.#createArrow(newArrow.position, newArrow.ref);
                 }
 
-                this.#loadNeighboringImages(referedScene);
+                this.#preloadNeighboringScenes(referedScene);
             }
         });
     }
@@ -207,7 +203,7 @@ class VirtualTour {
     }
 
     /**
-     * Changes the HTML element containing the virtual tour
+     * Changes the HTML element containing the virtual tour canvas
      * @param {String} elementId HTML element ID 
      */
     setContainer(elementId) {
