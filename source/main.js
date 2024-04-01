@@ -8,7 +8,7 @@ class VirtualTour {
      * @param {String} imageDirectory Directory containing the panoramic images
      */
     constructor(tourFile, containerElement, imageDirectory) {
-        this.scenes;
+        this.scenes = {};
         this.arrows = [];
         this.preloadedTextures = {};
 
@@ -56,7 +56,9 @@ class VirtualTour {
         const texture = this.preloadedTextures[this.scenes.startLocation];
         const sphereMaterial = new THREE.MeshBasicMaterial({
             map: texture,
-            side: THREE.BackSide
+            side: THREE.BackSide,
+            transparent: true,
+            opacity: 1
         });
 
         this.sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
@@ -71,7 +73,11 @@ class VirtualTour {
     #createArrow(coordinates, ref) {
         // const arrowTexture = this.textureLoader.load('assets/arrow.png');
         const arrowTexture = this.textureLoader.load(this.arrowImagePath);
-        const arrowMaterial = new THREE.SpriteMaterial({ map: arrowTexture });
+        const arrowMaterial = new THREE.SpriteMaterial({
+            map: arrowTexture,
+            alphaTest: 0.5
+        });
+
         const arrowSprite = new THREE.Sprite(arrowMaterial);
         arrowSprite.scale.set(5, 5, 1);
         arrowSprite.position.set(coordinates[0], coordinates[1], coordinates[2]);
@@ -164,16 +170,43 @@ class VirtualTour {
 
                 // moves to the refered scene scene
                 const referedScene = arrow.userData.ref;
+                // this.sphere.material.map = this.preloadedTextures[referedScene];
+                // this.sphere.material.needsUpdate = true;
+
+                // for (let newArrow of this.scenes[referedScene]) {
+                //     this.#createArrow(newArrow.position, newArrow.ref);
+                // }
+
+                this.#changeScene(referedScene);
+                this.#preloadNeighboringScenes(referedScene);
+            }
+        });
+    }
+
+
+    #changeScene(referedScene) {
+        // fades into the new image
+        const fade = (phase) => {
+            if ((phase == 1 && this.sphere.material.opacity > 0) ||
+                (phase == 2 && this.sphere.material.opacity < 1)) {
+                    this.sphere.material.opacity += phase === 1 ? -0.06 : 0.06;
+                setTimeout(() => {
+                    fade(phase);
+                }, 1);
+            }
+            else {
+                if (phase == 2) return;
+
                 this.sphere.material.map = this.preloadedTextures[referedScene];
                 this.sphere.material.needsUpdate = true;
 
                 for (let newArrow of this.scenes[referedScene]) {
                     this.#createArrow(newArrow.position, newArrow.ref);
                 }
-
-                this.#preloadNeighboringScenes(referedScene);
+                fade(2);
             }
-        });
+        };
+        fade(1);
     }
 
     /**
