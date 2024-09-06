@@ -1,4 +1,12 @@
-package.json
+.DS_Store
+
 node_modules/
+.parcel-cache/
+dist/
+
 package-lock.json
-webpack.config.js
+
+data.json
+index.html
+index.js
+images/

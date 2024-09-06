@@ -1,0 +1,35 @@
+{
+  "name": "fari",
+  "version": "1.1.0",
+  "description": "A lightweight library for creating virtual tours",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "parcel index.html",
+    "build": "parcel build index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maxmmueller/Fari.git"
+  },
+  "keywords": [
+    "virtual-tour",
+    "360-view",
+    "360-photo"
+  ],
+  "author": "Maximilian Müller",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/maxmmueller/Fari/issues"
+  },
+  "homepage": "https://github.com/maxmmueller/Fari#readme",
+  
+  "devDependencies": {
+    "parcel": "^2.12.0"
+  },
+  "dependencies": {
+    "three": "^0.168.0"
+  },
+  "main": "index.js"
+}

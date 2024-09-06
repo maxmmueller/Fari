@@ -1,47 +1,58 @@
-# `tourFile` Structure Guide
+# Structure Guide for the `sceneData` file
 
 To create a virtual tour, you will need to provide a JSON file that follows the structure described below.
 
-### Note: All of your images must be equirectangular .jpg files.
+### Note: All of the images have to be equirectangular .jpg files.
 
 ## 1. Start Location
 
-The `startLocation` key indicates where the tour will begin. It should correspond to the filename of the initial panoramic image (without the file extension).
+The `startLocation` key indicates where the tour will begin. It should correspond to the filename of the initial panorama-node (without the file extension).
 
 Example:
+
 ```json
 "startLocation": "pano_1"
 ```
 
-### 2. Panoramas
+### 2. Panorama-Nodes
 
-Each panorama in your tour is represented by a key-value pair in the JSON object. The key is the filename of the panoramic image (without the file extension), and the value is an array of objects representing the arrow buttons that link to other panoramas.
+Panorama-nodes represent the unique points in the virtual tour.
+Each node consists of an image, a name (which does not have to be unique) as well as unlimited amount of arrows that link between the differnet nodes.
+
+In the JSON object this is represented by a key-value pair. The key is the filename of the panoramic image (without the file extension) and the value is an array. The first item in the array is the name of the panorama-node (which does not have to be unique), followed by objects that represent the arrow buttons linking to other nodes.
 
 Example:
+
 ```json
-"pano_1": [
+  "pano_1": [      // 1. filename
+    "Living room", // 2. name of the node 
+
+    // arrow 1
     {
-      "position": [30, -10, -8],
+      "position": [15, 0, 0],
       "ref": "pano_2"
     },
+
+    // arrow 2
     {
-      "position": [-10, 0, -25],
+      "position": [0, 20, 1],
       "ref": "pano_4"
     }
-]
+  ],
 ```
 
 ### 3. Arrow Buttons
 
-Each arrow button is represented by an object within the array associated with a panorama key. It defines the position of the arrow button within the 3D scene and the reference to the next panorama.
+Each button is defined by a position within the 3D scene and a reference to an other node.
 
 - `position`: An array representing the x, y, and z coordinates of the arrow button's position.
 - `ref`: The filename (without the file extension) of the panorama to which the arrow button leads.
 
 Example:
+
 ```json
 {
-  "position": [30, -10, -8],
+  "position": [15, 0, 0],
   "ref": "pano_2"
 }
 ```
@@ -101,4 +112,3 @@ Ensure that each panorama has arrow buttons that lead to other panoramas to crea
 
 - Ensure all referenced panorama filenames match the keys in the JSON object.
 - Verify that the positions provided for arrow buttons are appropriate for your specific panoramic images and 3D scene.
-
