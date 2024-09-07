@@ -6,12 +6,12 @@
     "doc": "docs"
   },
   "scripts": {
-    "start": "parcel index.html",
-    "build": "parcel build index.js"
+    "watch": "parcel watch source/virtualTour.js --dist-dir dist",
+    "build": "parcel build source/virtualTour.js --dist-dir dist"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/maxmmueller/Fari.git"
+    "url": "https://github.com/maxmmueller/Fari.git"
   },
   "keywords": [
     "virtual-tour",
@@ -24,12 +24,19 @@
     "url": "https://github.com/maxmmueller/Fari/issues"
   },
   "homepage": "https://github.com/maxmmueller/Fari#readme",
-  
   "devDependencies": {
     "parcel": "^2.12.0"
   },
   "dependencies": {
     "three": "^0.168.0"
   },
-  "main": "index.js"
+  "source": "source/virtualTour.js",
+  "module": "dist/virtualTour.esm.js",
+  "type": "module",
+  "targets": {
+    "module": {
+      "outputFormat": "esmodule",
+      "includeNodeModules": true
+    }
+  }
 }
