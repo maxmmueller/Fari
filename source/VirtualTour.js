@@ -1,4 +1,3 @@
-// import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
@@ -7,7 +6,6 @@ import { ImageLayer } from './ImageLayer.js';
 
 import enterFullscreen from './assets/enter_fullscreen.png';
 import exitFullscreen from './assets/exit_fullscreen.png';
-
 
 class VirtualTour {
     /**
@@ -21,18 +19,23 @@ class VirtualTour {
         this.textureLoader = new THREE.TextureLoader();
         this.imageDirectory = imageDirectory;
 
+        this.containerId = containerElement;
         this.container = document.getElementById(containerElement);
+        this.#addCss();
         this.#addUiComponents();
         this.#setupRendererAndCamera();
         this.#setupControls();
 
         this.scene = new THREE.Scene();
         this.sceneSwitchAllowed = true;
-        
+
         this.#loadTourData(sceneData)
             .then(() => this.#preloadTexture(this.tourStructure.startLocation))
             .then(() => this.#initializeLayers(this.tourStructure.startLocation))
             .then(() => {
+                // Is executed at the beginning fit the initial window size
+                this.#onWindowResize();
+
                 this.#addEventListeners();
                 this.#preloadNeighboringTextures(this.tourStructure.startLocation);
 
@@ -57,6 +60,20 @@ class VirtualTour {
         `;
     }
 
+    async #addCss() {
+        const response = await fetch('styles.css');
+        let cssContent = await response.text();
+        cssContent = cssContent.replace("virtualTour", this.containerId);
+
+        const head = document.getElementsByTagName('head')[0];
+        const style = document.createElement('style');
+        style.setAttribute('type', 'text/css');
+        style.appendChild(document.createTextNode(cssContent));
+        head.appendChild(style);
+
+        document.querySelector(`#${this.containerId} canvas`).style.borderRadius = "20px";
+    }
+
     #setupRendererAndCamera() {
         const width = this.container.clientWidth;
         const height = this.container.clientHeight;
@@ -77,7 +94,6 @@ class VirtualTour {
     }
 
     async #loadTourData(sceneData) {
-        // this.tourStructure = sceneData;
         const response = await fetch(sceneData);
         this.tourStructure = await response.json();
     }
@@ -99,10 +115,10 @@ class VirtualTour {
     #initializeLayers(startLocation) {
         this.imageLayer = new ImageLayer(startLocation, this.preloadedTextures);
         this.arrowLayer = new ArrowLayer(startLocation, this.tourStructure, this.textureLoader);
-        
+
         this.scene.add(this.imageLayer);
         this.scene.add(this.arrowLayer);
-        
+
         document.getElementById("roomName").innerText = this.tourStructure[startLocation][0];
     }
 
@@ -138,7 +154,6 @@ class VirtualTour {
     }
 
     #onWindowResize() {
-
         const width = this.container.clientWidth;
         const height = this.container.clientHeight;
 
@@ -175,7 +190,7 @@ class VirtualTour {
 
         if (!document.fullscreenElement) {
             this.container.requestFullscreen()
-            document.querySelector("#virtualTour canvas").style.borderRadius = "0px";
+            document.querySelector(`#${this.containerId} canvas`).style.borderRadius = "0px";
             document.querySelector("#toggleFullScreen img").setAttribute("src", exitFullscreen);
         } else {
             document.exitFullscreen();
@@ -183,9 +198,8 @@ class VirtualTour {
     }
 
     #onFullscreenchange() {
-
         if (!document.fullscreenElement) {
-            document.querySelector("#virtualTour canvas").style.borderRadius = "20px";
+            document.querySelector(`#${this.containerId} canvas`).style.borderRadius = "20px";
             document.querySelector("#toggleFullScreen img").setAttribute("src", enterFullscreen);
         }
     }
@@ -201,12 +215,12 @@ class VirtualTour {
 
     #fadeTransition(direction) {
         let opacity = this.imageLayer.sphere.material.opacity;
-        
+
         if ((direction == -1 && opacity > 0) || (direction == 1 && opacity < 1)) {
             this.imageLayer.sphere.material.opacity += direction * 0.06;
             this.camera.fov += 0.4 * direction;
             this.camera.updateProjectionMatrix();
-            
+
             setTimeout(() => this.#fadeTransition(direction), 16);
         } else if (opacity <= 0) {
             this.#fadeTransition(1);
