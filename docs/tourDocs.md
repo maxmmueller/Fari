@@ -68,6 +68,7 @@ Ensure that each panorama has arrow buttons that lead to other panoramas to crea
   "startLocation": "pano_1",
 
   "pano_1": [
+    "Living room",
     {
       "position": [30, -10, -8],
       "ref": "pano_2"
@@ -79,6 +80,7 @@ Ensure that each panorama has arrow buttons that lead to other panoramas to crea
   ],
 
   "pano_2": [
+    "Kitchen",
     {
       "position": [-10, 2, -25],
       "ref": "pano_1"
@@ -86,6 +88,7 @@ Ensure that each panorama has arrow buttons that lead to other panoramas to crea
   ],
 
   "pano_3": [
+    "Bathroom",
     {
       "position": [-10, 0, -25],
       "ref": "pano_1"
@@ -93,6 +96,7 @@ Ensure that each panorama has arrow buttons that lead to other panoramas to crea
   ],
 
   "pano_4": [
+    "Bedroom 1",
     {
       "position": [-10, 2, -25],
       "ref": "pano_5"
@@ -100,6 +104,7 @@ Ensure that each panorama has arrow buttons that lead to other panoramas to crea
   ],
 
   "pano_5": [
+    "Bedroom 2",
     {
       "position": [40, 2, 1],
       "ref": "pano_1"
@@ -107,8 +112,3 @@ Ensure that each panorama has arrow buttons that lead to other panoramas to crea
   ]
 }
 ```
-
-### Notes:
-
-- Ensure all referenced panorama filenames match the keys in the JSON object.
-- Verify that the positions provided for arrow buttons are appropriate for your specific panoramic images and 3D scene.
