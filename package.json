@@ -1,6 +1,6 @@
 {
   "name": "fari",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "A lightweight library for creating virtual tours",
   "directories": {
     "doc": "docs"

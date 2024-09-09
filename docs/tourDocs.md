@@ -4,7 +4,23 @@ To create a virtual tour, you will need to provide a JSON file that follows the 
 
 ### Note: All of the images have to be equirectangular .jpg files.
 
-## 1. Start Location
+## 1. Image directory
+
+The `imageDirectory` key defines the path to the folder that contains all the 360-degree images used in the tour.
+
+Example:
+
+```json
+"imageDirectory": "pano_images"
+```
+
+Alternatively the image directory can also be passed as a third argument when creating a new virtualTour object.
+
+```JavaScript
+const tour = new VirtualTour('tour-div', 'tour_structure.json', 'pano_images');
+```
+
+## 2. Start Location
 
 The `startLocation` key indicates where the tour will begin. It should correspond to the filename of the initial panorama-node (without the file extension).
 
@@ -14,7 +30,7 @@ Example:
 "startLocation": "pano_1"
 ```
 
-### 2. Panorama-Nodes
+## 3. Panorama-Nodes
 
 Panorama-nodes represent the unique points in the virtual tour.
 Each node consists of an image, a name (which does not have to be unique) as well as unlimited amount of arrows that link between the differnet nodes.
@@ -25,7 +41,7 @@ Example:
 
 ```json
   "pano_1": [      // 1. filename
-    "Living room", // 2. name of the node 
+    "Living room", // 2. name of the node
 
     // arrow 1
     {
@@ -41,7 +57,7 @@ Example:
   ],
 ```
 
-### 3. Arrow Buttons
+## 4. Arrow Buttons
 
 Each button is defined by a position within the 3D scene and a reference to an other node.
 
@@ -57,7 +73,7 @@ Example:
 }
 ```
 
-### 4. Creating Connections
+## 5. Creating Connections
 
 Ensure that each panorama has arrow buttons that lead to other panoramas to create a connected tour experience. Circular references are allowed (e.g., pano_1 can lead to pano_2, and pano_2 can lead back to pano_1).
 
@@ -65,6 +81,7 @@ Ensure that each panorama has arrow buttons that lead to other panoramas to crea
 
 ```json
 {
+  "imageDirectory": "pano_images",
   "startLocation": "pano_1",
 
   "pano_1": [
