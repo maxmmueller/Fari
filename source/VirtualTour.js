@@ -11,7 +11,7 @@ class VirtualTour {
     /**
      * @param {string} containerElement ID of the HTML element that should contain the tour
      * @param {string} sceneData Path of a json file that contains the structure of the tour
-     * @param {string} imageDirectory Path of the directory that contains the 360-degree images
+     * @param {string} [imageDirectory] Path of the directory that contains the 360-degree images (optional)
      */
     constructor(containerElement, sceneData, imageDirectory) {
         this.tourStructure = {};
@@ -30,9 +30,11 @@ class VirtualTour {
         this.sceneSwitchAllowed = true;
 
         this.#loadTourData(sceneData)
+            .then(() => this.setImageDirectory(imageDirectory))
             .then(() => this.#preloadTexture(this.tourStructure.startLocation))
             .then(() => this.#initializeLayers(this.tourStructure.startLocation))
             .then(() => {
+                console.log(this.imageDirectory)
                 // Is executed at the beginning fit the initial window size
                 this.#onWindowResize();
 
@@ -73,6 +75,12 @@ class VirtualTour {
 
         document.querySelector(`#${this.containerId} canvas`).style.borderRadius = "20px";
     }
+
+
+    setImageDirectory(imageDirectory) {
+        this.imageDirectory = imageDirectory ?? this.tourStructure.imageDirectory;
+    }
+    
 
     #setupRendererAndCamera() {
         const width = this.container.clientWidth;
