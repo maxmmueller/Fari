@@ -10,12 +10,18 @@
 With Fari, you can easily integrate [virtual tours](https://en.wikipedia.org/wiki/Virtual_tour) into your own website or nodejs projects.
 
 ## Installation
-
-You can install Fari from the node package manager:
+**Method 1:** You can install Fari from the node package manager:
 
 ```
 $ npm install fari
 ```
+
+**Method 2:** Alternatively you can bundle the code yourself. To do so, simply download the latest release, navigate to the `fari` directory in your terminal and run:
+```
+$ npm install
+$ npm run build
+```
+This will create the `dist` directory containing the bundled code from which you can import.
 
 ## Usage
 
