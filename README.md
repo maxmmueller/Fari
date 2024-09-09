@@ -15,8 +15,9 @@ With Fari, you can easily integrate [virtual tours](https://en.wikipedia.org/wik
 ```
 $ npm install fari
 ```
+<br>
 
-**Method 2:** Alternatively you can bundle the code yourself. To do so, simply download the latest release, navigate to the `fari` directory in your terminal and run:
+**Method 2:** Alternatively you can bundle the code yourself. To do so, simply download the [latest release](https://github.com/maxmmueller/Fari/releases/latest), navigate to the `fari` directory in your terminal and run:
 ```
 $ npm install
 $ npm run build
