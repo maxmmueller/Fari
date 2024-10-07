@@ -34,8 +34,7 @@ class VirtualTour {
             .then(() => this.#preloadTexture(this.tourStructure.startLocation))
             .then(() => this.#initializeLayers(this.tourStructure.startLocation))
             .then(() => {
-                console.log(this.imageDirectory)
-                // Is executed at the beginning fit the initial window size
+                // Is executed at the beginning to fit the initial window size
                 this.#onWindowResize();
 
                 this.#addEventListeners();
@@ -62,18 +61,30 @@ class VirtualTour {
         `;
     }
 
+    
     async #addCss() {
-        const response = await fetch('styles.css');
-        let cssContent = await response.text();
-        cssContent = cssContent.replace("virtualTour", this.containerId);
+        const cssFile = new URL('./styles.css', import.meta.url);
 
-        const head = document.getElementsByTagName('head')[0];
-        const style = document.createElement('style');
-        style.setAttribute('type', 'text/css');
-        style.appendChild(document.createTextNode(cssContent));
-        head.appendChild(style);
+        try {
+            const response = await fetch(cssFile);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            let cssContent = await response.text();
 
-        document.querySelector(`#${this.containerId} canvas`).style.borderRadius = "20px";
+            cssContent = cssContent.replace("virtualTour", this.containerId);
+
+            const head = document.getElementsByTagName('head')[0];
+            const style = document.createElement('style');
+            style.setAttribute('type', 'text/css');
+            style.appendChild(document.createTextNode(cssContent));
+            head.appendChild(style);
+
+            document.querySelector(`#${this.containerId} canvas`).style.borderRadius = "20px";
+            
+        } catch (error) {
+            console.error('Failed to fetch the CSS file:', error);
+        }
     }
 
 
@@ -213,7 +224,6 @@ class VirtualTour {
     }
 
     #switchScene(newScene) {
-
         if (!this.sceneSwitchAllowed) return;
         this.sceneSwitchAllowed = false;
         this.arrowLayer.clearArrows();
