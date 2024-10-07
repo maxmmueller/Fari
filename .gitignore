@@ -7,3 +7,4 @@ dist/
 package-lock.json
 
 tests/
+dist_files/
