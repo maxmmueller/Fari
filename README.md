@@ -1,16 +1,14 @@
 <div align="center">
 <h1>Fari</h1>
+
 <a href="https://www.npmjs.com/package/fari"><img src="https://img.shields.io/npm/dm/fari"/></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202-blue"/></a>
 
 <p>A lightweight JavaScript library for creating virtual tours</p>
 
-<a href="https://maxmmueller.github.io/faridemo/source/index.html" target="_blank">
-  <div style="display: inline-block; padding: 8px 16px; font-size: 16px; font-weight: 500; color: white; background-color: #38b73d; border-radius: 5px;">
-    View Demo 🚀
-  </div>
-</a>
+[View demo 🚀](https://en.wikipedia.org/wiki/Virtual_tour)
 </div>
+
 
 
 ## Features
