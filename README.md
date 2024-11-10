@@ -6,7 +6,7 @@
 
 <p>A lightweight JavaScript library for creating virtual tours</p>
 
-[View demo 🚀](https://en.wikipedia.org/wiki/Virtual_tour)
+[View demo 🚀](https://maxmmueller.github.io/faridemo/source/index.html)
 </div>
 
 
